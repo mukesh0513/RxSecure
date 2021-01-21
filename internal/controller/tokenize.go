@@ -19,7 +19,7 @@ func (base *Controller) Get(c *gin.Context) {
 
 	// Fill return data struct
 	data := model.GetApiMessageData{
-		Data:         post,
+		Data: post,
 	}
 
 	c.JSON(200, data)

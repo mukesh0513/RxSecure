@@ -5,5 +5,5 @@ type GetApiMessageData struct {
 }
 
 type GetApiParams struct {
-	Token   string
+	Token string
 }

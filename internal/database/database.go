@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	DB    *gorm.DB
-	err   error
+	DB  *gorm.DB
+	err error
 )
 
 type Database struct {

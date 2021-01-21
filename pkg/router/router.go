@@ -18,7 +18,7 @@ func Setup(db *gorm.DB) *gin.Engine {
 
 	api := controller.Controller{DB: db}
 
-	routes := r.Group("/",gin.BasicAuth(gin.Accounts{
+	routes := r.Group("/", gin.BasicAuth(gin.Accounts{
 		"username1": "password1",
 		"username2": "password2",
 		"username3": "password3",
