@@ -24,9 +24,9 @@ func Setup(db *gorm.DB) *gin.Engine {
 		"username3": "password3",
 	}))
 	{
-		routes.GET("/", api.Get)
 		routes.POST("/", api.Create)
-		routes.POST("/getToken", api.Fetch)
+		routes.GET("/:id", api.Fetch)
+		routes.DELETE("/", api.Delete)
 	}
 
 	encryptionKeyGenerateroute := r.Group("/generate_key", gin.BasicAuth(gin.Accounts{

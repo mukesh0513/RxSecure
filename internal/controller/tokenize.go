@@ -6,25 +6,6 @@ import (
 	"github.com/mukesh0513/RxSecure/internal/service"
 )
 
-func (base *Controller) Get(c *gin.Context) {
-	var args model.GetApiParams
-
-	args.Token = c.DefaultQuery("token", "null")
-
-	// Fetch results from database
-	post, err := service.GetTokenizeValue(c, args)
-	if err != nil {
-		c.AbortWithStatus(500)
-	}
-
-	// Fill return data struct
-	data := model.GetApiMessageData{
-		Data: post,
-	}
-
-	c.JSON(200, data)
-}
-
 func (base *Controller) Create(c *gin.Context) {
 	payload := new(model.Payload)
 
@@ -44,19 +25,21 @@ func (base *Controller) Create(c *gin.Context) {
 }
 
 func (base *Controller) Fetch(c *gin.Context) {
-	data := new(model.Data)
+	//var args model.GetApiParams
+	//
+	//args.Token = c.DefaultQuery("token", "null")
 
-	err := c.ShouldBindJSON(&data)
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
+	token, _ := c.Params.Get("id")
 
-	token, err := service.GetToken(c, data)
+	token, err := service.GetToken(c, token)
 	if err != nil {
 		c.AbortWithStatus(500)
 		return
 	}
 
 	c.JSON(200, token)
+}
+
+func (base *Controller) Delete(c *gin.Context) {
+	c.JSON(200, nil)
 }

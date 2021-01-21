@@ -69,11 +69,11 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	return token, nil
 }
 
-func GetToken(c *gin.Context, data *model.Data) (string, error) {
+func GetToken(c *gin.Context, token string) (string, error) {
 
 	//Generate Random 32-byte token
-	var token = data.Token
-	fmt.Println("token -> " + token)
+	//var token = args.Token
+	//fmt.Println("token -> " + token)
 	//Generate Hash for the token to fetch index of encryption key
 	var hash = utils.GenerateHash(token)
 	//var hash = 1
