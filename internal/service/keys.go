@@ -9,8 +9,8 @@ import (
 	"github.com/mukesh0513/RxSecure/internal/utils"
 	"log"
 
-	"github.com/gin-gonic/gin"
 	"crypto/rand"
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -54,17 +54,14 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	var token = utils.GenerateToken()
 	fmt.Println("token -> " + token)
 	//Generate Hash for the token to fetch index of encryption key
-	//var hash = utils.GenerateHash(token)
-	var hash = 1
+	var hash = utils.GenerateHash(token)
+	//var hash = 1
 	var encryptedKey, _ = GetEncryptedKey(c, hash)
 	decryptKeyInputParams := make(map[string]interface{})
 	decryptKeyInputParams["key"] = MASTER_KEY
 	decryptKeyInputParams["encryptedText"] = encryptedKey.EncKey
 	var decryptedKey = decryptor.AESDecrypt(decryptKeyInputParams)
-	encryptPayloadInputParams := make(map[string]interface{})
-	encryptPayloadInputParams["key"] = decryptedKey
-	encryptPayloadInputParams["plainText"] = payload.Payload
-	var encryptedPayload = encryptor.AESEncrypt(encryptPayloadInputParams)
+	var encryptedPayload = encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
 	data := new(model.Data)
 	data.Token = token
 	data.Payload = encryptedPayload.(string)
@@ -78,8 +75,8 @@ func GetToken(c *gin.Context, data *model.Data) (string, error) {
 	var token = data.Token
 	fmt.Println("token -> " + token)
 	//Generate Hash for the token to fetch index of encryption key
-	//var hash = utils.GenerateHash(token)
-	var hash = 1
+	var hash = utils.GenerateHash(token)
+	//var hash = 1
 	var encryptedKey, _ = GetEncryptedKey(c, hash)
 	decryptKeyInputParams := make(map[string]interface{})
 	decryptKeyInputParams["key"] = MASTER_KEY
@@ -96,16 +93,17 @@ func GetToken(c *gin.Context, data *model.Data) (string, error) {
 	return decryptedPayload.(string), nil
 }
 
-func GenerateEncryptionKeys(c *gin.Context)  {
+func GenerateEncryptionKeys(c *gin.Context) error {
 	for i:=0; i< MaxEncryptionKeys; i++{
 		key := make([]byte, 32)
 		_, err := rand.Read(key)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		encryptionRow := model.EncKeys{}
-		encryptionRow.EncKey = fmt.Sprintf("%x", key)
+		encryptionRow.EncKey = encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key)).(string)
 		database.DB.Create(&encryptionRow)
 	}
+	return nil
 }

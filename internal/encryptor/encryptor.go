@@ -8,7 +8,12 @@ import (
 	"reflect"
 )
 
-func AESEncrypt(inputParams map[string]interface{}) (interface{}) {
+func AESEncrypt(key string, plainText string) interface{} {
+
+	inputParams := map[string]interface{}{
+		"key":       key,
+		"plainText": plainText,
+	}
 
 	assertRule := map[string]reflect.Kind{
 		"key":       reflect.String,
@@ -17,14 +22,11 @@ func AESEncrypt(inputParams map[string]interface{}) (interface{}) {
 
 	utils.Validate(inputParams, assertRule)
 
-	key := inputParams["key"].(string)
-	message := inputParams["plainText"].(string)
-
 	decodedBytes, ok := hex.DecodeString(key) //hexDecode
 	if ok != nil {
 		log.Fatal(ok)
 	}
-	encryptedString := EcbEncrypt(decodedBytes, message)
+	encryptedString := EcbEncrypt(decodedBytes, plainText)
 
 	encoded := base64.StdEncoding.EncodeToString([]byte(encryptedString))
 
