@@ -4,5 +4,5 @@ import "github.com/jinzhu/gorm"
 
 type Keys struct {
 	gorm.Model
-	Token 	  string `json:"token"  gorm:"column:token"`
+	EncKey string `json:"enc_key"  gorm:"column:enc_key"`
 }
