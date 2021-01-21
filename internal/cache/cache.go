@@ -3,7 +3,6 @@ package cache
 import (
 	"sync"
 	"time"
-	_ "time"
 
 	"github.com/patrickmn/go-cache"
 )
