@@ -1,7 +1,7 @@
 package model
 
 type GetApiMessageData struct {
-	Data Keys
+	Data EncKeys
 }
 
 type GetApiParams struct {

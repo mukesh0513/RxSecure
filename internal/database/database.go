@@ -41,7 +41,7 @@ func Setup() {
 		}
 
 		db.LogMode(config.Database.LogMode)
-		db.AutoMigrate(&model.Keys{})
+		db.AutoMigrate(&model.EncKeys{})
 		db.AutoMigrate(&model.Data{})
 		DB = db
 
