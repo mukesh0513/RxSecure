@@ -4,6 +4,6 @@ import "github.com/jinzhu/gorm"
 
 type Data struct {
 	gorm.Model
-	Token  string `json:"token"  gorm:"column:token"`
-	Payload string `json:"payload"  gorm:"column:payload"`
+	Token   string `redis:"token" json:"token"  gorm:"column:token"`
+	Payload string `redis:"payload" json:"payload"  gorm:"column:payload"`
 }

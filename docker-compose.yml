@@ -1,0 +1,30 @@
+version: '3'
+services:
+  mysql_db:
+    container_name: mysql_db
+    image: mysql:5.7
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./DummyDbData/db:/docker-entrypoint-initdb.d/init.sql
+#  redis_db:
+#    command: redis-server --requirepass redis
+#    image: redis:5.0.7
+#    container_name: redis_db
+#    ports:
+#      - 6379:6379
+#    expose:
+#      - 6379
+  app:
+    container_name: rxSecure_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mysql_db

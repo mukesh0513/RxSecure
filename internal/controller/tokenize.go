@@ -12,7 +12,7 @@ func (base *Controller) Get(c *gin.Context) {
 	args.Token = c.DefaultQuery("token", "null")
 
 	// Fetch results from database
-	post, err := service.GetTokenizeValue(c, base.DB, args)
+	post, err := service.GetTokenizeValue(c, args)
 	if err != nil {
 		c.AbortWithStatus(500)
 	}
@@ -34,7 +34,7 @@ func (base *Controller) Create(c *gin.Context) {
 		return
 	}
 
-	post, err = service.CreateToken(c, base.DB, post)
+	post, err = service.CreateToken(c, post)
 	if err != nil {
 		c.AbortWithStatus(500)
 		return
