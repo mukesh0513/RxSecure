@@ -10,10 +10,13 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"crypto/rand"
 )
 
-const MASTER_KEY = "1D8AB5CC1426BE1A2F519877F1D92595EEA5A908A25975F60080D22E7F2583E3"
-
+const (
+	MASTER_KEY = "1D8AB5CC1426BE1A2F519877F1D92595EEA5A908A25975F60080D22E7F2583E3"
+	MaxEncryptionKeys = 1000
+	)
 
 func GetTokenizeValue(c *gin.Context, args model.GetApiParams) (model.EncKeys, error) {
 	var post model.EncKeys
@@ -91,4 +94,18 @@ func GetToken(c *gin.Context, data *model.Data) (string, error) {
 	var decryptedPayload = decryptor.AESDecrypt(decryptPayloadInputParams)
 
 	return decryptedPayload.(string), nil
+}
+
+func GenerateEncryptionKeys(c *gin.Context)  {
+	for i:=0; i< MaxEncryptionKeys; i++{
+		key := make([]byte, 32)
+		_, err := rand.Read(key)
+		if err != nil {
+			panic(err)
+		}
+
+		encryptionRow := model.EncKeys{}
+		encryptionRow.EncKey = fmt.Sprintf("%x", key)
+		database.DB.Create(&encryptionRow)
+	}
 }

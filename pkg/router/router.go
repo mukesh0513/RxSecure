@@ -29,5 +29,12 @@ func Setup(db *gorm.DB) *gin.Engine {
 		routes.POST("/getToken", api.Fetch)
 	}
 
+	encryptionKeyGenerateroute := r.Group("/generate_key", gin.BasicAuth(gin.Accounts{
+		"who_are_you": "batman",
+	}))
+	{
+		encryptionKeyGenerateroute.POST("/", api.GenerateEncryptionKeys)
+	}
+
 	return r
 }
