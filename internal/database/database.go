@@ -56,7 +56,7 @@ func Setup() {
 	db.LogMode(config.Database.LogMode)
 
 	// Auto migrate project models
-	db.AutoMigrate(&model.Keys{})
+	db.AutoMigrate(&model.EncKeys{})
 	DB = db
 }
 

@@ -11,6 +11,8 @@ func (base *Controller) Get(c *gin.Context) {
 
 	args.Token = c.DefaultQuery("token", "null")
 
+
+
 	// Fetch results from database
 	post, err := service.GetTokenizeValue(c, base.DB, args)
 	if err != nil {
@@ -26,19 +28,37 @@ func (base *Controller) Get(c *gin.Context) {
 }
 
 func (base *Controller) Create(c *gin.Context) {
-	post := new(model.Keys)
+	payload := new(model.Payload)
 
-	err := c.ShouldBindJSON(&post)
+	err := c.ShouldBindJSON(&payload)
 	if err != nil {
 		c.AbortWithStatus(400)
 		return
 	}
 
-	post, err = service.CreateToken(c, base.DB, post)
+	token, err := service.CreateToken(c, base.DB, payload)
 	if err != nil {
 		c.AbortWithStatus(500)
 		return
 	}
 
-	c.JSON(200, post)
+	c.JSON(200, token)
+}
+
+func (base *Controller) Fetch(c *gin.Context) {
+	data := new(model.Data)
+
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	token, err := service.GetToken(c, base.DB, data)
+	if err != nil {
+		c.AbortWithStatus(500)
+		return
+	}
+
+	c.JSON(200, token)
 }
