@@ -9,7 +9,12 @@ import (
 	"reflect"
 )
 
-func AESDecrypt(inputParams map[string]interface{}) (interface{}) {
+func AESDecrypt(key string, message string) (interface{}) {
+
+	inputParams := map[string]interface{}{
+		"key":       key,
+		"encryptedText": message,
+	}
 
 	assertRule := map[string]reflect.Kind{
 		"key":           reflect.String,
@@ -17,9 +22,6 @@ func AESDecrypt(inputParams map[string]interface{}) (interface{}) {
 	}
 
 	utils.Validate(inputParams, assertRule)
-
-	key := inputParams["key"].(string)
-	message := inputParams["encryptedText"].(string)
 
 	decodedBytes, ok := hex.DecodeString(key) //hexDecode
 	if ok != nil {

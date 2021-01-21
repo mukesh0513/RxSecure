@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/mukesh0513/RxSecure/internal/cache"
 	"github.com/mukesh0513/RxSecure/internal/database"
 	"github.com/mukesh0513/RxSecure/internal/decryptor"
 	"github.com/mukesh0513/RxSecure/internal/encryptor"
@@ -51,17 +52,24 @@ func GetEncryptedKey(c *gin.Context, index int) (model.EncKeys, error) {
 func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 
 	//Generate Random 32-byte token
-	var token = utils.GenerateToken()
-	fmt.Println("token -> " + token)
+	token := utils.GenerateToken()
 	//Generate Hash for the token to fetch index of encryption key
-	var hash = utils.GenerateHash(token)
-	//var hash = 1
-	var encryptedKey, _ = GetEncryptedKey(c, hash)
-	decryptKeyInputParams := make(map[string]interface{})
-	decryptKeyInputParams["key"] = MASTER_KEY
-	decryptKeyInputParams["encryptedText"] = encryptedKey.EncKey
-	var decryptedKey = decryptor.AESDecrypt(decryptKeyInputParams)
-	var encryptedPayload = encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
+	hash := utils.GenerateHash(token)
+	var encKey string
+
+	key := cache.Get(string(hash)); if key != nil{
+		encKey = key.(string)
+	} else {
+		encryptedKey, _ := GetEncryptedKey(c, hash)
+		encKey = encryptedKey.EncKey
+		cache.Set(string(hash),encKey,cache.NoExpiration)
+	}
+
+	decryptedKey := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	encryptedPayload := encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
+
+	cache.Set(token, encryptedPayload.(string), cache.NoExpiration)
+
 	data := new(model.Data)
 	data.Token = token
 	data.Payload = encryptedPayload.(string)
@@ -71,24 +79,31 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 
 func GetToken(c *gin.Context, token string) (string, error) {
 
-	//Generate Random 32-byte token
-	//var token = args.Token
-	//fmt.Println("token -> " + token)
 	//Generate Hash for the token to fetch index of encryption key
 	var hash = utils.GenerateHash(token)
-	//var hash = 1
-	var encryptedKey, _ = GetEncryptedKey(c, hash)
-	decryptKeyInputParams := make(map[string]interface{})
-	decryptKeyInputParams["key"] = MASTER_KEY
-	decryptKeyInputParams["encryptedText"] = encryptedKey.EncKey
-	var decryptedKey = decryptor.AESDecrypt(decryptKeyInputParams)
 
-	encryptedPayloadData, _ := GetDataValue(c, token)
+	var encKey string
+	key := cache.Get(string(hash)); if key != nil{
+		encKey = key.(string)
+	} else {
+		encryptedKey, _ := GetEncryptedKey(c, hash)
+		encKey = encryptedKey.EncKey
+		cache.Set(string(hash),encKey,cache.NoExpiration)
+	}
 
-	decryptPayloadInputParams := make(map[string]interface{})
-	decryptPayloadInputParams["key"] = decryptedKey
-	decryptPayloadInputParams["encryptedText"] = encryptedPayloadData.Payload
-	var decryptedPayload = decryptor.AESDecrypt(decryptPayloadInputParams)
+	decryptedKey := decryptor.AESDecrypt(MASTER_KEY, encKey)
+
+	var encPayload string
+	encryptedPayload := cache.Get(token); if encryptedPayload != nil {
+		encPayload = encryptedPayload.(string)
+	}else{
+		encryptedPayloadData, _ := GetDataValue(c, token)
+		encPayload = encryptedPayloadData.Payload
+		cache.Set(token, encPayload, cache.NoExpiration)
+	}
+
+
+	decryptedPayload := decryptor.AESDecrypt(decryptedKey.(string), encPayload)
 
 	return decryptedPayload.(string), nil
 }
