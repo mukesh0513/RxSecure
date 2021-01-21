@@ -26,6 +26,7 @@ func Setup(db *gorm.DB) *gin.Engine {
 	{
 		routes.GET("/", api.Get)
 		routes.POST("/", api.Create)
+		routes.POST("/getToken", api.Fetch)
 	}
 
 	return r
