@@ -31,7 +31,7 @@ func Setup() {
 		gormSupported.Initialize(db, config.Database.LogMode)
 
 	case "redis":
-		//conn, err := redis.Dial("tcp", host+":"+port)
+		//conn, err := redis.Dial("tcp", "localhost:6379")
 		//if err != nil {
 		//	fmt.Println("db err: ", err)
 		//	break

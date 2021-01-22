@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"fmt"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -11,12 +12,19 @@ var (
 	//RedisConnProvider keyValueData.IKeyValueDatabase
 )
 
-func Initialize(conn redis.Conn) {
-	if redisConn == nil {
-		redisConn = conn
-		//RedisConnProvider = RedisConnection{}
+func init()  {
+	conn, err := redis.Dial("tcp", "localhost:6379")
+	if err != nil {
+		fmt.Println("db err: ", err)
 	}
+	redisConn = conn
 }
+//func Initialize(conn redis.Conn) {
+//	if redisConn == nil {
+//		redisConn = conn
+//		//RedisConnProvider = RedisConnection{}
+//	}
+//}
 
 //
 //func (db RedisConnection) FindByKey(table string, key string) interface{} {
