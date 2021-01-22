@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mukesh0513/RxSecure/internal/cache"
 	"github.com/mukesh0513/RxSecure/internal/database"
@@ -60,13 +61,23 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	key := cache.Get(string(hash)); if key != nil{
 		encKey = key.(string)
 	} else {
-		encryptedKey, _ := GetEncryptedKey(c, hash)
+		encryptedKey, ok := GetEncryptedKey(c, hash)
+		if ok != nil{
+			return "", errors.New(ok.Error())
+		}
+
 		encKey = encryptedKey.EncKey
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
 
-	decryptedKey, _ := decryptor.AESDecrypt(MASTER_KEY, encKey)
-	encryptedPayload, _ := encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
+	decryptedKey, err := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	if err != nil {
+		return "", errors.New("Unable to fetch key")
+	}
+	encryptedPayload, err := encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
+	if err != nil {
+		return "", errors.New("Error while encrypting the payload")
+	}
 
 	cache.Set(token, encryptedPayload.(string), cache.NoExpiration)
 
@@ -74,6 +85,7 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	data.Token = token
 	data.Payload = encryptedPayload.(string)
 	database.DB.Create(data)
+
 	return token, nil
 }
 
@@ -86,24 +98,38 @@ func GetToken(c *gin.Context, token string) (string, error) {
 	key := cache.Get(string(hash)); if key != nil{
 		encKey = key.(string)
 	} else {
-		encryptedKey, _ := GetEncryptedKey(c, hash)
+		encryptedKey, ok := GetEncryptedKey(c, hash)
+		if ok != nil{
+			return "", errors.New(ok.Error())
+		}
+
 		encKey = encryptedKey.EncKey
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
 
-	decryptedKey, _ := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	decryptedKey, err := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	if err != nil {
+		return "", errors.New("Unable to fetch key")
+	}
 
 	var encPayload string
 	encryptedPayload := cache.Get(token); if encryptedPayload != nil {
 		encPayload = encryptedPayload.(string)
 	}else{
-		encryptedPayloadData, _ := GetDataValue(c, token)
+		encryptedPayloadData, ok := GetDataValue(c, token)
+		if ok != nil{
+			return "", errors.New(ok.Error())
+		}
+
 		encPayload = encryptedPayloadData.Payload
 		cache.Set(token, encPayload, cache.NoExpiration)
 	}
 
 
-	decryptedPayload, _ := decryptor.AESDecrypt(decryptedKey.(string), encPayload)
+	decryptedPayload, err := decryptor.AESDecrypt(decryptedKey.(string), encPayload)
+	if err != nil {
+		return "", errors.New("Error while decrypting the payload")
+	}
 
 	return decryptedPayload.(string), nil
 }
@@ -117,7 +143,11 @@ func GenerateEncryptionKeys(c *gin.Context) error {
 		}
 
 		encryptionRow := model.EncKeys{}
-		encKey, _ := encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key))
+		encKey, ok := encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key))
+		if ok != nil{
+			return errors.New(ok.Error())
+		}
+
 		encryptionRow.EncKey = encKey.(string)
 		database.DB.Create(&encryptionRow)
 	}
