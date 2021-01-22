@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"fmt"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -9,15 +8,35 @@ type RedisConnection struct{}
 
 var (
 	redisConn         redis.Conn
+	connPool *redis.Pool
 	//RedisConnProvider keyValueData.IKeyValueDatabase
 )
 
-func init()  {
-	conn, err := redis.Dial("tcp", "localhost:6379")
-	if err != nil {
-		fmt.Println("db err: ", err)
+func newPool() *redis.Pool {
+	return &redis.Pool{
+		// Maximum number of idle connections in the pool.
+		MaxIdle: 50,
+		// max number of connections
+		MaxActive: 10000,
+		// Dial is an application supplied function for creating and
+		// configuring a connection.
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", ":6379")
+			if err != nil {
+				panic(err.Error())
+			}
+			return c, err
+		},
 	}
-	redisConn = conn
+}
+
+func init()  {
+	connPool = newPool()
+	//conn, err := redis.Dial("tcp", "localhost:6379")
+	//if err != nil {
+	//	fmt.Println("db err: ", err)
+	//}
+	//redisConn = conn
 }
 //func Initialize(conn redis.Conn) {
 //	if redisConn == nil {

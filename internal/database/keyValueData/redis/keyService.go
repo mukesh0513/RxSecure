@@ -20,6 +20,7 @@ func (service KeyService) GetEncryptedKey(hash int64) string {
 	//	log.Fatal(err)
 	//}
 	//return result
+	redisConn = connPool.Get()
 
 	result, err := redis.String(redisConn.Do("HGET", "enc_keys:"+string(hash), "enc_key"))
 	if err != nil {
@@ -44,12 +45,13 @@ func (service KeyService) SetEncryptedKey(hash int64, enc_key string) string {
 	//	log.Fatal(err)
 	//}
 	//return  ""
+	redisConn = connPool.Get()
 
-	result, err := redisConn.Do("HSET", "enc_keys:"+string(hash), "enc_key", enc_key)
+	_, err := redisConn.Do("HSET", "enc_keys:"+string(hash), "enc_key", enc_key)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return result.(string)
+	return ""
 }
 
 func NewKeyService() KeyService {
