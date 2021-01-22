@@ -66,15 +66,15 @@ func GetToken(c *gin.Context, token string) (string, error) {
 	//Generate Hash for the token to fetch index of encryption key
 	var hash = utils.GenerateHash(token)
 
-	var encKey string
+	var encryptedKey string
 	key := cache.Get(string(hash)); if key != nil{
-		encKey = key.(string)
+		encryptedKey = key.(string)
 		logrus.Info(map[string]interface{}{
 			"component":       "GetToken",
 			"message": 		   "Fetching from cache",
 		})
 	} else {
-		var encryptedKey = IKeyFactory(config.GetConfig().DatabaseSelection.Keys).GetEncryptedKey(int64(hash))
+		encryptedKey = IKeyFactory(config.GetConfig().DatabaseSelection.Keys).GetEncryptedKey(int64(hash))
 		logrus.Info(map[string]interface{}{
 			"component":       "GetToken",
 			"message": 		   "Fetching from DB",
@@ -82,7 +82,7 @@ func GetToken(c *gin.Context, token string) (string, error) {
 		cache.Set(string(hash),encryptedKey,cache.NoExpiration)
 	}
 
-	decryptedKey, err := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	decryptedKey, err := decryptor.AESDecrypt(MASTER_KEY, encryptedKey)
 	if err != nil {
 		return "", errors.New("Unable to fetch key")
 	}
@@ -99,8 +99,8 @@ func GetToken(c *gin.Context, token string) (string, error) {
 			"component":       "GetToken",
 			"message": 		   "Fetching from DB",
 		})
-		encryptedPayloadData := IPayloadFactory(config.GetConfig().DatabaseSelection.Payload).GetEncryptedData(token)
-		cache.Set(token, encryptedPayloadData, cache.NoExpiration)
+		encPayload = IPayloadFactory(config.GetConfig().DatabaseSelection.Payload).GetEncryptedData(token)
+		cache.Set(token, encPayload, cache.NoExpiration)
 	}
 
 
