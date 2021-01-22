@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func EcbDecrypt(key []byte, message string) (string) {
+func EcbDecrypt(key []byte, message string) string {
 
 	cipherText, decodeErr := base64.StdEncoding.DecodeString(message)
 	if decodeErr != nil {

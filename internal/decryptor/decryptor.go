@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func AESDecrypt(inputParams map[string]interface{}) (interface{}) {
+func AESDecrypt(inputParams map[string]interface{}) interface{} {
 
 	assertRule := map[string]reflect.Kind{
 		"key":           reflect.String,

@@ -8,18 +8,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/mukesh0513/RxSecure/internal/config"
-	"github.com/mukesh0513/RxSecure/internal/model"
-	redisDb "github.com/mukesh0513/RxSecure/internal/provider/redis"
+	redis2 "github.com/mukesh0513/RxSecure/internal/database/keyValueData/redis"
+	"github.com/mukesh0513/RxSecure/internal/database/sqlData/gormSupported"
 )
-
-var (
-	DB  *gorm.DB
-	err error
-)
-
-type Database struct {
-	*gorm.DB
-}
 
 // Setup opens a database and saves the reference to `Database` struct.
 func Setup() {
@@ -39,11 +30,7 @@ func Setup() {
 			fmt.Println("db err: ", err)
 			break
 		}
-
-		db.LogMode(config.Database.LogMode)
-		db.AutoMigrate(&model.EncKeys{})
-		db.AutoMigrate(&model.Data{})
-		DB = db
+		gormSupported.Initialize(db, config.Database.LogMode)
 
 	case "redis":
 		conn, err := redis.Dial("tcp", host+":"+port)
@@ -51,22 +38,6 @@ func Setup() {
 			fmt.Println("db err: ", err)
 			break
 		}
-		redisDb.Initialize(conn)
+		redis2.Initialize(conn)
 	}
 }
-
-// GetDB helps you to get a connection
-func GetDB() *gorm.DB {
-	return DB
-}
-
-//func SelectDbAndFire()  {
-//	mysqlConnection := mysql.GetMysqlConn()
-//	redisConnection := redisDb.GetRedisConn()
-//	switch true {
-//	case mysqlConnection == nil:
-//		mysql.MysqlConnection{}.Find()
-//	case redisConnection == nil:
-//
-//	}
-//}

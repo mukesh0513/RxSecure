@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func EcbEncrypt(key []byte, message string) (string) {
+func EcbEncrypt(key []byte, message string) string {
 
 	plaintext := utils.PKCS5Padding([]byte(message), aes.BlockSize)
 

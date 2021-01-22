@@ -9,7 +9,7 @@ const charset string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst
 const idSize int = 32
 const firstJan2014 = 1388534400
 
-func GenerateToken() (string) {
+func GenerateToken() string {
 	nanotime := time.Now().UTC().UnixNano()
 	b62 := nanotimeToBaseN(nanotime, charset)
 	rand.Seed(nanotime)
