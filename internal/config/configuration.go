@@ -11,6 +11,7 @@ var Config *Configuration
 type Configuration struct {
 	Server   ServerConfiguration
 	Database DatabaseConfiguration
+	DatabaseSelection DatabaseSelection
 }
 
 // Setup initialize configuration

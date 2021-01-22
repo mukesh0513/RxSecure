@@ -3,13 +3,12 @@ package encryptor
 import (
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"github.com/mukesh0513/RxSecure/internal/utils"
 	"github.com/sirupsen/logrus"
 	"reflect"
 )
 
-func AESEncrypt(key string, plainText string) (interface{}, error) {
+func AESEncrypt(key string, plainText string) interface{} {
 
 	inputParams := map[string]interface{}{
 		"key":       key,
@@ -23,7 +22,7 @@ func AESEncrypt(key string, plainText string) (interface{}, error) {
 
 	validateError := utils.Validate(inputParams, assertRule)
 	if validateError != nil {
-		return nil, validateError
+		return nil
 	}
 
 	decodedBytes, ok := hex.DecodeString(key) //hexDecode
@@ -32,14 +31,14 @@ func AESEncrypt(key string, plainText string) (interface{}, error) {
 			"component":       "AESEncrypt",
 			"message": 		   ok,
 		})
-		return "", errors.New(ok.Error())
+		return ""
 	}
 	encryptedString, err := EcbEncrypt(decodedBytes, plainText)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
 	encoded := base64.StdEncoding.EncodeToString([]byte(encryptedString))
 
-	return encoded, nil
+	return encoded
 }

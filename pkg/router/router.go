@@ -1,14 +1,13 @@
 package router
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/mukesh0513/RxSecure/internal/controller"
 	"github.com/mukesh0513/RxSecure/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Setup(db *gorm.DB) *gin.Engine {
+func Setup() *gin.Engine {
 	r := gin.New()
 
 	// Middlewares
@@ -16,7 +15,7 @@ func Setup(db *gorm.DB) *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(middleware.CORS())
 
-	api := controller.Controller{DB: db}
+	api := controller.Controller{}
 
 	routes := r.Group("/", gin.BasicAuth(gin.Accounts{
 		"username1": "password1",

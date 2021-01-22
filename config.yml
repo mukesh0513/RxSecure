@@ -10,3 +10,7 @@ database:
 
 server:
   port: "8081"
+
+databaseSelection:
+  keys: "redis"
+  payload: "mysql"

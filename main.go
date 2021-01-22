@@ -15,8 +15,7 @@ func init() {
 func main() {
 	config := config.GetConfig()
 
-	db := database.GetDB()
-	r := router.Setup(db)
+	r := router.Setup()
 
 	log.Printf("Server is starting at 127.0.0.1:%s", config.Server.Port)
 	r.Run("127.0.0.1:" + config.Server.Port)
