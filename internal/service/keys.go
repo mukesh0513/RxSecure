@@ -9,6 +9,7 @@ import (
 	"github.com/mukesh0513/RxSecure/internal/encryptor"
 	"github.com/mukesh0513/RxSecure/internal/model"
 	"github.com/mukesh0513/RxSecure/internal/utils"
+	"github.com/sirupsen/logrus"
 	"log"
 
 	"crypto/rand"
@@ -60,12 +61,19 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 
 	key := cache.Get(string(hash)); if key != nil{
 		encKey = key.(string)
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from cache",
+		})
 	} else {
 		encryptedKey, ok := GetEncryptedKey(c, hash)
 		if ok != nil{
 			return "", errors.New(ok.Error())
 		}
-
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from DB",
+		})
 		encKey = encryptedKey.EncKey
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
@@ -97,12 +105,19 @@ func GetToken(c *gin.Context, token string) (string, error) {
 	var encKey string
 	key := cache.Get(string(hash)); if key != nil{
 		encKey = key.(string)
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from cache",
+		})
 	} else {
 		encryptedKey, ok := GetEncryptedKey(c, hash)
 		if ok != nil{
 			return "", errors.New(ok.Error())
 		}
-
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from DB",
+		})
 		encKey = encryptedKey.EncKey
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
@@ -114,8 +129,16 @@ func GetToken(c *gin.Context, token string) (string, error) {
 
 	var encPayload string
 	encryptedPayload := cache.Get(token); if encryptedPayload != nil {
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from cache",
+		})
 		encPayload = encryptedPayload.(string)
 	}else{
+		logrus.Info(map[string]interface{}{
+			"component":       "GetToken",
+			"message": 		   "Fetching from DB",
+		})
 		encryptedPayloadData, ok := GetDataValue(c, token)
 		if ok != nil{
 			return "", errors.New(ok.Error())
