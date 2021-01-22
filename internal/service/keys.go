@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/mukesh0513/RxSecure/internal/config"
 	"github.com/mukesh0513/RxSecure/internal/decryptor"
 	"github.com/mukesh0513/RxSecure/internal/encryptor"
 	"github.com/mukesh0513/RxSecure/internal/model"
@@ -23,7 +24,7 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	//Generate Hash for the token to fetch index of encryption key
 	var hash = utils.GenerateHash(token)
 	//var hash = 1
-	var encryptedKey = IKeyFactory("mysql").GetEncryptedKey(int64(hash))
+	var encryptedKey = IKeyFactory(config.GetConfig().DatabaseSelection.Keys).GetEncryptedKey(int64(hash))
 	decryptKeyInputParams := make(map[string]interface{})
 	decryptKeyInputParams["key"] = MASTER_KEY
 	decryptKeyInputParams["encryptedText"] = encryptedKey
@@ -33,7 +34,7 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 	//data.Token = token
 	//data.Payload = encryptedPayload.(string)
 	//
-	IPayloadFactory("mysql").SetEncryptedData(token, encryptedPayload.(string))
+	IPayloadFactory(config.GetConfig().DatabaseSelection.Payload).SetEncryptedData(token, encryptedPayload.(string))
 	//database.DB.Create(data)
 	return token, nil
 }
@@ -46,13 +47,13 @@ func GetToken(c *gin.Context, token string) (string, error) {
 	//Generate Hash for the token to fetch index of encryption key
 	var hash = utils.GenerateHash(token)
 	//var hash = 1
-	var encryptedKey = IKeyFactory("mysql").GetEncryptedKey(int64(hash))
+	var encryptedKey = IKeyFactory(config.GetConfig().DatabaseSelection.Keys).GetEncryptedKey(int64(hash))
 	decryptKeyInputParams := make(map[string]interface{})
 	decryptKeyInputParams["key"] = MASTER_KEY
 	decryptKeyInputParams["encryptedText"] = encryptedKey
 	var decryptedKey = decryptor.AESDecrypt(decryptKeyInputParams)
 
-	encryptedPayloadData:= IPayloadFactory("mysql").GetEncryptedData(token)
+	encryptedPayloadData:= IPayloadFactory(config.GetConfig().DatabaseSelection.Payload).GetEncryptedData(token)
 
 	decryptPayloadInputParams := make(map[string]interface{})
 	decryptPayloadInputParams["key"] = decryptedKey
@@ -72,7 +73,7 @@ func GenerateEncryptionKeys(c *gin.Context) error {
 
 		encryptionRow := model.EncKeys{}
 		encryptionRow.EncKey = encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key)).(string)
-		IKeyFactory("mysql").SetEncryptedKey(int64(i), encryptionRow.EncKey)
+		IKeyFactory(config.GetConfig().DatabaseSelection.Keys).SetEncryptedKey(int64(i), encryptionRow.EncKey)
 		//database.DB.Create(&encryptionRow)
 	}
 	return nil

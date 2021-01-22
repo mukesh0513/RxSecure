@@ -2,13 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/mukesh0513/RxSecure/internal/config"
-	redis2 "github.com/mukesh0513/RxSecure/internal/database/keyValueData/redis"
 	"github.com/mukesh0513/RxSecure/internal/database/sqlData/gormSupported"
 )
 
@@ -33,11 +31,11 @@ func Setup() {
 		gormSupported.Initialize(db, config.Database.LogMode)
 
 	case "redis":
-		conn, err := redis.Dial("tcp", host+":"+port)
-		if err != nil {
-			fmt.Println("db err: ", err)
-			break
-		}
-		redis2.Initialize(conn)
+		//conn, err := redis.Dial("tcp", host+":"+port)
+		//if err != nil {
+		//	fmt.Println("db err: ", err)
+		//	break
+		//}
+		//redis2.Initialize(conn)
 	}
 }
