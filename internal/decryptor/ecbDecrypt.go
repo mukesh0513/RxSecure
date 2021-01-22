@@ -3,29 +3,46 @@ package decryptor
 import (
 	"crypto/aes"
 	"encoding/base64"
+	"errors"
 	"github.com/mukesh0513/RxSecure/internal/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
-	"log"
 )
 
-func EcbDecrypt(key []byte, message string) (string) {
+func EcbDecrypt(key []byte, message string) (string, error) {
 
 	cipherText, decodeErr := base64.StdEncoding.DecodeString(message)
 	if decodeErr != nil {
-		log.Fatal(decodeErr)
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbDecrypt",
+			"message": 		   decodeErr,
+		})
+		return "", errors.New(decodeErr.Error())
 	}
 
 	if len(cipherText) < aes.BlockSize {
-		log.Fatal("cipherText block is too short")
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbDecrypt",
+			"message": 		   "cipherText block is too short",
+		})
+		return "", errors.New("cipherText block is too short")
 	}
 
 	cipherBlock, cipherErr := aes.NewCipher(key)
 	if cipherErr != nil {
-		log.Fatal("Error occurred creating cipher")
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbDecrypt",
+			"message": 		   "Error occurred creating cipher",
+		})
+		return "", errors.New("Error occurred creating cipher")
 	}
 
 	if len(cipherText)%aes.BlockSize != 0 {
-		log.Fatal("ciphertext is not a multiple of the block size")
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbDecrypt",
+			"message": 		   "ciphertext is not a multiple of the block size",
+		})
+		return "", errors.New("ciphertext is not a multiple of the block size")
 	}
 
 	mode := NewDecrypterWithModeECB(cipherBlock)
@@ -36,5 +53,5 @@ func EcbDecrypt(key []byte, message string) (string) {
 
 	plaintext := cast.ToString(unpaddedCipherText)
 
-	return plaintext
+	return plaintext, nil
 }
