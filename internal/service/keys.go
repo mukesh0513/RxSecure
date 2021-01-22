@@ -65,8 +65,8 @@ func CreateToken(c *gin.Context, payload *model.Payload) (string, error) {
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
 
-	decryptedKey := decryptor.AESDecrypt(MASTER_KEY, encKey)
-	encryptedPayload := encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
+	decryptedKey, _ := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	encryptedPayload, _ := encryptor.AESEncrypt(decryptedKey.(string), payload.Payload)
 
 	cache.Set(token, encryptedPayload.(string), cache.NoExpiration)
 
@@ -91,7 +91,7 @@ func GetToken(c *gin.Context, token string) (string, error) {
 		cache.Set(string(hash),encKey,cache.NoExpiration)
 	}
 
-	decryptedKey := decryptor.AESDecrypt(MASTER_KEY, encKey)
+	decryptedKey, _ := decryptor.AESDecrypt(MASTER_KEY, encKey)
 
 	var encPayload string
 	encryptedPayload := cache.Get(token); if encryptedPayload != nil {
@@ -103,7 +103,7 @@ func GetToken(c *gin.Context, token string) (string, error) {
 	}
 
 
-	decryptedPayload := decryptor.AESDecrypt(decryptedKey.(string), encPayload)
+	decryptedPayload, _ := decryptor.AESDecrypt(decryptedKey.(string), encPayload)
 
 	return decryptedPayload.(string), nil
 }
@@ -117,7 +117,8 @@ func GenerateEncryptionKeys(c *gin.Context) error {
 		}
 
 		encryptionRow := model.EncKeys{}
-		encryptionRow.EncKey = encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key)).(string)
+		encKey, _ := encryptor.AESEncrypt(MASTER_KEY, fmt.Sprintf("%x", key))
+		encryptionRow.EncKey = encKey.(string)
 		database.DB.Create(&encryptionRow)
 	}
 	return nil

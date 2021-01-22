@@ -3,21 +3,30 @@ package encryptor
 import (
 	"crypto/aes"
 	"encoding/base64"
+	"errors"
 	"github.com/mukesh0513/RxSecure/internal/utils"
-	"log"
+	"github.com/sirupsen/logrus"
 )
 
-func EcbEncrypt(key []byte, message string) (string) {
+func EcbEncrypt(key []byte, message string) (string, error) {
 
 	plaintext := utils.PKCS5Padding([]byte(message), aes.BlockSize)
 
 	if len(plaintext)%aes.BlockSize != 0 {
-		log.Fatal("plaintext is not a multiple of the block size")
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbEncrypt",
+			"message": 		   "plaintext is not a multiple of the block size",
+		})
+		return "", errors.New("plaintext is not a multiple of the block size")
 	}
 
 	block, cipherErr := aes.NewCipher(key)
 	if cipherErr != nil {
-		log.Fatal("Error creating new cipher")
+		logrus.Info(map[string]interface{}{
+			"component":       "EcbEncrypt",
+			"message": 		   "Error creating new cipher",
+		})
+		return "", errors.New("Error creating new cipher")
 	}
 
 	cipherText := make([]byte, len(plaintext))
@@ -27,5 +36,5 @@ func EcbEncrypt(key []byte, message string) (string) {
 
 	encrypted := base64.StdEncoding.EncodeToString(cipherText)
 
-	return encrypted
+	return encrypted, nil
 }
