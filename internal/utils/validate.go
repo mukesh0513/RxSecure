@@ -1,17 +1,18 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
 	"github.com/spf13/cast"
-	"log"
 	"reflect"
 )
 
-func Validate(input map[string]interface{}, assertRule map[string]reflect.Kind) {
+func Validate(input map[string]interface{}, assertRule map[string]reflect.Kind) error{
 
 	for key, assertType := range assertRule {
 		value, ok := input[key]
 		if !ok {
-			log.Fatal(ok)
+			return errors.New(fmt.Sprintf("[%v] not present in map", key))
 		}
 
 		//If we donot want to assert for type then the function will skip asserting type for that key
@@ -20,11 +21,13 @@ func Validate(input map[string]interface{}, assertRule map[string]reflect.Kind) 
 		}
 
 		if value == nil {
-			log.Fatal(cast.ToString(key) + cast.ToString(" is null"))
+			return errors.New(cast.ToString(key) + cast.ToString(" is null"))
 		}
 
 		if reflect.TypeOf(value).Kind() != assertType {
-			log.Fatal(cast.ToString(key) + cast.ToString(" not of type ") + cast.ToString(assertType))
+			return errors.New(cast.ToString(key) + cast.ToString(" not of type ") + cast.ToString(assertType))
 		}
 	}
+
+	return nil
 }
